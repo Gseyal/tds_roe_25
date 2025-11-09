@@ -1,0 +1,41 @@
+name: Matrix Build f1d8f38
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20, 22]   # 3 matrix variants
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # REQUIRED IDENTIFIER STEP
+      - name: matrix-f1d8f38
+        run: echo "Building for Node.js ${{ matrix.node-version }}"
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Generate build artifact
+        run: |
+          FILE_NAME=build-output-node-${{ matrix.node-version }}.txt
+          echo "Build output for Node.js ${{ matrix.node-version }}" > "$FILE_NAME"
+          echo "Timestamp: $(date)" >> "$FILE_NAME"
+          echo "Git commit: $GITHUB_SHA" >> "$FILE_NAME"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # REQUIRED PREFIX: build-f1d8f38-<variant>
+          name: build-f1d8f38-node${{ matrix.node-version }}
+          path: build-output-node-${{ matrix.node-version }}.txt
